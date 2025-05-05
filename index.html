@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anatomía Humana Interactiva</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+        
+        header {
+            background-color: #2c3e50;
+            color: white;
+            padding: 1rem;
+            text-align: center;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .anatomy-viewer {
+            display: flex;
+            margin-top: 2rem;
+            gap: 2rem;
+        }
+        
+        .systems-menu {
+            width: 250px;
+            background-color: white;
+            padding: 1rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .system-button {
+            display: block;
+            width: 100%;
+            padding: 0.8rem;
+            margin-bottom: 0.5rem;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            text-align: left;
+        }
+        
+        .system-button:hover {
+            background-color: #2980b9;
+        }
+        
+        .system-button.active {
+            background-color: #2c3e50;
+        }
+        
+        .visual-area {
+            flex-grow: 1;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            display: flex;
+            position: relative;
+            overflow: hidden;
+            min-height: 500px;
+        }
+        
+        .human-body {
+            position: relative;
+            width: 300px;
+            height: 450px;
+            margin: 20px auto;
+        }
+        
+        .body-outline {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+        
+        .body-system {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            transition: opacity 0.5s;
+            z-index: 2;
+        }
+        
+        .body-system.active {
+            opacity: 1;
+        }
+        
+        .info-panel {
+            width: 50%;
+            padding: 1.5rem;
+            overflow-y: auto;
+        }
+        
+        .part-button {
+            background-color: rgba(52, 152, 219, 0.7);
+            border: none;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            position: absolute;
+            cursor: pointer;
+            transition: all 0.3s;
+            z-index: 3;
+        }
+        
+        .part-button:hover {
+            background-color: rgba(41, 128, 185, 0.9);
+            transform: scale(1.2);
+        }
+        
+        .part-info {
+            display: none;
+            background-color: #f8f9fa;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-top: 1rem;
+            border-left: 4px solid #3498db;
+        }
+        
+        .part-info.active {
+            display: block;
+        }
+        
+        footer {
+            text-align: center;
+            padding: 1rem;
+            margin-top: 2rem;
+            background-color: #2c3e50;
+            color: white;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        @media (max-width: 768px) {
+            .anatomy-viewer {
+                flex-direction: column;
+            }
+            
+            .systems-menu {
+                width: 100%;
+                margin-bottom: 1rem;
+            }
+            
+            .visual-area {
+                flex-direction: column;
+            }
+            
+            .info-panel {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Anatomía Humana Interactiva</h1>
+        <p>Explora los diferentes sistemas del cuerpo humano</p>
+    </header>
+    
+    <div class="container">
+        <div class="anatomy-viewer">
+            <div class="systems-menu">
+                <h2>Sistemas Corporales</h2>
+                <button class="system-button active" data-system="muscular">Sistema Muscular</button>
+                <button class="system-button" data-system="esqueletico">Sistema Esquelético</button>
+                <button class="system-button" data-system="nervioso">Sistema Nervioso</button>
+                <button class="system-button" data-system="circulatorio">Sistema Circulatorio</button>
+                <button class="system-button" data-system="respiratorio">Sistema Respiratorio</button>
+                <button class="system-button" data-system="digestivo">Sistema Digestivo</button>
+            </div>
+            
+            <div class="visual-area">
+                <div class="human-body">
+                    <!-- Silueta básica del cuerpo humano -->
+                    <svg class="body-outline" viewBox="0 0 100 150" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M50,10 C60,10 65,15 65,25 C65,35 60,40 55,42 L55,50 L60,55 L60,65 L55,70 L55,100 C55,105 60,110 60,120 C60,130 55,145 50,145 C45,145 40,130 40,120 C40,110 45,105 45,100 L45,70 L40,65 L40,55 L45,50 L45,42 C40,40 35,35 35,25 C35,15 40,10 50,10 Z" fill="none" stroke="#333" stroke-width="1" />
+                    </svg>
+                    
+                    <!-- Sistema Muscular -->
+                    <svg class="body-system active" id="muscular" viewBox="0 0 100 150" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M50,10 C60,10 65,15 65,25 C65,35 60,40 55,42 L55,50 L60,55 L60,65 L55,70 L55,100 C55,105 60,110 60,120 C60,130 55,145 50,145 C45,145 40,130 40,120 C40,110 45,105 45,100 L45,70 L40,65 L40,55 L45,50 L45,42 C40,40 35,35 35,25 C35,15 40,10 50,10 Z" fill="#FF9B9B" stroke="#E57373" stroke-width="1" />
+                        <ellipse cx="47" cy="30" rx="3" ry="5" fill="#E57373" />
+                        <ellipse cx="53" cy="30" rx="3" ry="5" fill="#E57373" />
+                        <path d="M42,55 C45,58 55,58 58,55" fill="none" stroke="#E57373" stroke-width="1" />
+                        <ellipse cx="50" cy="80" rx="8" ry="12" fill="#E57373" />
+                    </svg>
+                    
+                    <!-- Sistema Esquelético -->
+                    <svg class="body-system" id="esqueletico" viewBox="0 0 100 150" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M50,10 C60,10 65,15 65,25 C65,35 60,40 55,42 L55,50 L60,55 L60,65 L55,70 L55,100 C55,105 60,110 60,120 C60,130 55,145 50,145 C45,145 40,130 40,120 C40,110 45,105 45,100 L45,70 L40,65 L40,55 L45,50 L45,42 C40,40 35,35 35,25 C35,15 40,10 50,10 Z" fill="#F5F5F5" stroke="#E0E0E0" stroke-width="1" />
+                        <ellipse cx="50" cy="25" rx="10" ry="12" fill="#FFFFFF" stroke="#E0E0E0" stroke-width="1" />
+                        <line x1="50" y1="37" x2="50" y2="100" stroke="#FFFFFF" stroke-width="3" />
+                        <line x1="40" y1="55" x2="60" y2="55" stroke="#FFFFFF" stroke-width="2" />
+                        <line x1="45" y1="100" x2="45" y2="145" stroke="#FFFFFF" stroke-width="2" />
+                        <line x1="55" y1="100" x2="55" y2="145" stroke="#FFFFFF" stroke-width="2" />
+                    </svg>
+                    
+                    <!-- Sistema Nervioso -->
+                    <svg class="body-system" id="nervioso" viewBox="0 0 100 150" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M50,10 C60,10 65,15 65,25 C65,35 60,40 55,42 L55,50 L60,55 L60,65 L55,70 L55,100 C55,105 60,110 60,120 C60,130 55,145 50,145 C45,145 40,130 40,120 C40,110 45,105 45,100 L45,70 L40,65 L40,55 L45,50 L45,42 C40,40 35,35 35,25 C35,15 40,10 50,10 Z" fill="#E8F5E9" stroke="#81C784" stroke-width="1" />
+                        <ellipse cx="50" cy="25" rx="12" ry="14" fill="#A5D6A7" />
+                        <path d="M50,39 L50,145" stroke="#A5D6A7" stroke-width="2" />
+                        <path d="M50,50 L40,60" stroke="#A5D6A7" stroke-width="1" />
+                        <path d="M50,50 L60,60" stroke="#A5D6A7" stroke-width="1" />
+                        <path d="M50,70 L40,80" stroke="#A5D6A7" stroke-width="1" />
+                        <path d="M50,70 L60,80" stroke="#A5D6A7" stroke-width="1" />
+                        <path d="M50,90 L40,100" stroke="#A5D6A7" stroke-width="1" />
+                        <path d="M50,90 L60,100" stroke="#A5D6A7" stroke-width="1" />
+                    </svg>
+                    
+                    <!-- Sistema Circulatorio -->
+                    <svg class="body-system" id="circulatorio" viewBox="0 0 100 150" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M50,10 C60,10 65,15 65,25 C65,35 60,40 55,42 L55,50 L60,55 L60,65 L55,70 L55,100 C55,105 60,110 60,120 C60,130 55,145 50,145 C45,145 40,130 40,120 C40,110 45,105 45,100 L45,70 L40,65 L40,55 L45,50 L45,42 C40,40 35,35 35,25 C35,15 40,10 50,10 Z" fill="#E3F2FD" stroke="#90CAF9" stroke-width="1" />
+                        <ellipse cx="50" cy="40" rx="10" ry="12" fill="#90CAF9" />
+                        <path d="M50,52 L50,145" stroke="#90CAF9" stroke-width="2" />
+                        <path d="M50,60 L30,70" stroke="#90CAF9" stroke-width="1" />
+                        <path d="M50,60 L70,70" stroke="#90CAF9" stroke-width="1" />
+                        <path d="M50,80 L30,95" stroke="#90CAF9" stroke-width="1" />
+                        <path d="M50,80 L70,95" stroke="#90CAF9" stroke-width="1" />
+                        <path d="M50,100 L35,115" stroke="#90CAF9" stroke-width="1" />
+                        <path d="M50,100 L65,115" stroke="#90CAF9" stroke-width="1" />
+                    </svg>
+                    
+                    <!-- Sistema Respiratorio -->
+                    <svg class="body-system" id="respiratorio" viewBox="0 0 100 150" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M50,10 C60,10 65,15 65,25 C65,35 60,40 55,42 L55,50 L60,55 L60,65 L55,70 L55,100 C55,105 60,110 60,120 C60,130 55,145 50,145 C45,145 40,130 40,120 C40,110 45,105 45,100 L45,70 L40,65 L40,55 L45,50 L45,42 C40,40 35,35 35,25 C35,15 40,10 50,10 Z" fill="#FFF3E0" stroke="#FFB74D" stroke-width="1" />
+                        <path d="M50,30 L50,55" stroke="#FFB74D" stroke-width="2" />
+                        <ellipse cx="45" cy="60" rx="8" ry="10" fill="#FFB74D" />
+                        <ellipse cx="55" cy="60" rx="8" ry="10" fill="#FFB74D" />
+                    </svg>
+                    
+                    <!-- Sistema Digestivo -->
+                    <svg class="body-system" id="digestivo" viewBox="0 0 100 150" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M50,10 C60,10 65,15 65,25 C65,35 60,40 55,42 L55,50 L60,55 L60,65 L55,70 L55,100 C55,105 60,110 60,120 C60,130 55,145 50,145 C45,145 40,130 40,120 C40,110 45,105 45,100 L45,70 L40,65 L40,55 L45,50 L45,42 C40,40 35,35 35,25 C35,15 40,10 50,10 Z" fill="#F3E5F5" stroke="#CE93D8" stroke-width="1" />
+                        <path d="M50,30 L50,40" stroke="#CE93D8" stroke-width="2" />
+                        <ellipse cx="50" cy="45" rx="5" ry="5" fill="#CE93D8" />
+                        <path d="M50,50 L50,65" stroke="#CE93D8" stroke-width="2" />
+                        <ellipse cx="50" cy="70" rx="8" ry="10" fill="#CE93D8" />
+                        <path d="M50,80 C50,85 45,90 45,95 C45,100 55,100 55,105 C55,110 45,115 45,120 C45,125 55,130 50,135" stroke="#CE93D8" stroke-width="2" fill="none" />
+                    </svg>
+                    
+                    <!-- Puntos interactivos para el sistema muscular -->
+                    <button class="part-button" style="top: 30%; left: 40%;" data-part="biceps"></button>
+                    <button class="part-button" style="top: 45%; left: 45%;" data-part="abdominales"></button>
+                    <button class="part-button" style="top: 60%; left: 40%;" data-part="cuadriceps"></button>
+                </div>
+                
+                <div class="info-panel">
+                    <div class="tab-content active" id="muscular-info">
+                        <h2>Sistema Muscular</h2>
+                        <p>El sistema muscular está compuesto por más de 600 músculos que son responsables del movimiento corporal, mantenimiento de la postura, estabilización de las articulaciones y generación de calor.</p>
+                        
+                        <div class="part-info active" id="biceps-info">
+                            <h3>Bíceps</h3>
+                            <p>El bíceps braquial es un músculo de dos cabezas ubicado en la parte anterior del brazo entre el hombro y el codo. Su función principal es la flexión del codo y la supinación del antebrazo.</p>
+                            <p>Algunas características importantes:</p>
+                            <ul>
+                                <li>Origen: Cabeza larga en el tubérculo supraglenoideo de la escápula; cabeza corta en la apófisis coracoides.</li>
+                                <li>Inserción: Tuberosidad bicipital del radio y fascia del antebrazo.</li>
+                                <li>Inervación: Nervio musculocutáneo (C5-C6).</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="part-info" id="abdominales-info">
+                            <h3>Abdominales</h3>
+                            <p>Los músculos abdominales forman la pared anterior del abdomen y son fundamentales para la postura, el soporte de las vísceras y los movimientos del tronco.</p>
+                            <p>El grupo abdominal incluye:</p>
+                            <ul>
+                                <li>Recto abdominal: Flexión del tronco.</li>
+                                <li>Oblicuos externos e internos: Rotación y flexión lateral del tronco.</li>
+                                <li>Transverso abdominal: Compresión abdominal y estabilización.</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="part-info" id="cuadriceps-info">
+                            <h3>Cuádriceps</h3>
+                            <p>El cuádriceps femoral es un grupo muscular ubicado en la parte anterior del muslo, compuesto por cuatro músculos que actúan principalmente como extensores de la rodilla.</p>
+                            <p>Los cuatro componentes son:</p>
+                            <ul>
+                                <li>Recto femoral</li>
+                                <li>Vasto lateral</li>
+                                <li>Vasto medial</li>
+                                <li>Vasto intermedio</li>
+                            </ul>
+                            <p>Es uno de los músculos más potentes del cuerpo y es fundamental para actividades como caminar, correr y saltar.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="tab-content" id="esqueletico-info">
+                        <h2>Sistema Esquelético</h2>
+                        <p>El sistema esquelético humano consta de 206 huesos que proporcionan soporte estructural, protección a órganos vitales, almacenamiento de minerales y producción de células sanguíneas.</p>
+                        <p>Los huesos se clasifican según su forma en:</p>
+                        <ul>
+                            <li>Huesos largos (como el fémur y el húmero)</li>
+                            <li>Huesos cortos (como los del carpo)</li>
+                            <li>Huesos planos (como los del cráneo)</li>
+                            <li>Huesos irregulares (como las vértebras)</li>
+                            <li>Huesos sesamoideos (como la rótula)</li>
+                        </ul>
+                        <p>El esqueleto se divide en axial (cráneo, columna vertebral y caja torácica) y apendicular (extremidades superiores e inferiores).</p>
+                    </div>
+                    
+                    <div class="tab-content" id="nervioso-info">
+                        <h2>Sistema Nervioso</h2>
+                        <p>El sistema nervioso es la red de tejidos que transmite señales entre diferentes partes del cuerpo, coordina acciones voluntarias e involuntarias y transmite señales entre diferentes partes del organismo.</p>
+                        <p>Se divide en:</p>
+                        <ul>
+                            <li><strong>Sistema Nervioso Central (SNC):</strong> Cerebro y médula espinal.</li>
+                            <li><strong>Sistema Nervioso Periférico (SNP):</strong> Nervios craneales y espinales.</li>
+                        </ul>
+                        <p>El SNC funciona como el centro de control principal, mientras que el SNP sirve como medio de comunicación con el resto del cuerpo.</p>
+                    </div>
+                    
+                    <div class="tab-content" id="circulatorio-info">
+                        <h2>Sistema Circulatorio</h2>
+                        <p>El sistema circulatorio es responsable del transporte de sangre, nutrientes, hormonas, oxígeno y células inmunitarias por todo el cuerpo. También ayuda a estabilizar la temperatura corporal y el pH.</p>
+                        <p>Componentes principales:</p>
+                        <ul>
+                            <li><strong>Corazón:</strong> Bombea la sangre a través del cuerpo.</li>
+                            <li><strong>Arterias:</strong> Transportan sangre desde el corazón.</li>
+                            <li><strong>Venas:</strong> Devuelven la sangre al corazón.</li>
+                            <li><strong>Capilares:</strong> Permiten el intercambio de sustancias entre la sangre y los tejidos.</li>
+                        </ul>
+                        <p>La sangre completa un circuito por todo el cuerpo aproximadamente cada 60 segundos.</p>
+                    </div>
+                    
+                    <div class="tab-content" id="respiratorio-info">
+                        <h2>Sistema Respiratorio</h2>
+                        <p>El sistema respiratorio permite el intercambio de gases entre el organismo y el medio ambiente. Su principal función es suministrar oxígeno al cuerpo y eliminar dióxido de carbono.</p>
+                        <p>Principales órganos:</p>
+                        <ul>
+                            <li><strong>Nariz y cavidad nasal:</strong> Filtran, calientan y humedecen el aire.</li>
+                            <li><strong>Faringe:</strong> Conduce el aire a la laringe.</li>
+                            <li><strong>Laringe:</strong> Contiene las cuerdas vocales.</li>
+                            <li><strong>Tráquea:</strong> Tubo que conduce el aire a los pulmones.</li>
+                            <li><strong>Bronquios y bronquiolos:</strong> Ramificaciones que distribuyen el aire en los pulmones.</li>
+                            <li><strong>Alvéolos:</strong> Sacos diminutos donde ocurre el intercambio gaseoso.</li>
+                            <li><strong>Pulmones:</strong> Órganos principales de la respiración.</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="tab-content" id="digestivo-info">
+                        <h2>Sistema Digestivo</h2>
+                        <p>El sistema digestivo procesa los alimentos, extrae los nutrientes y elimina los desechos. Se extiende desde la boca hasta el ano y tiene una longitud de aproximadamente 9 metros.</p>
+                        <p>Componentes principales:</p>
+                        <ul>
+                            <li><strong>Boca:</strong> Inicio de la digestión mecánica y química.</li>
+                            <li><strong>Esófago:</strong> Transporta el alimento al estómago.</li>
+                            <li><strong>Estómago:</strong> Almacena y mezcla los alimentos con jugos digestivos.</li>
+                            <li><strong>Intestino delgado:</strong> Principal sitio de absorción de nutrientes.</li>
+                            <li><strong>Intestino grueso:</strong> Absorbe agua y sales minerales.</li>
+                            <li><strong>Órganos accesorios:</strong> Hígado, vesícula biliar y páncreas.</li>
+                        </ul>
+                        <p>El proceso completo de digestión puede tardar entre 24 y 72 horas.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <footer>
+        <p>© 2025 Anatomía Humana Interactiva</p>
+    </footer>
+    
+    <script>
+        // Inicialización y cambio de sistemas
+        document.addEventListener('DOMContentLoaded', function() {
+            const systemButtons = document.querySelectorAll('.system-button');
+            const bodySystems = document.querySelectorAll('.body-system');
+            const tabContents = document.querySelectorAll('.tab-content');
+            const partButtons = document.querySelectorAll('.part-button');
+            const partInfos = document.querySelectorAll('.part-info');
+            
+            // Función para cambiar sistemas
+            function changeSystem(systemId) {
+                // Desactivar todos los sistemas
+                bodySystems.forEach(system => {
+                    system.classList.remove('active');
+                });
+                
+                // Desactivar todos los botones
+                systemButtons.forEach(button => {
+                    button.classList.remove('active');
+                });
+                
+                // Desactivar todas las pestañas de información
+                tabContents.forEach(tab => {
+                    tab.classList.remove('active');
+                });
+                
+                // Activar el sistema seleccionado
+                document.getElementById(systemId).classList.add('active');
+                document.querySelector(`[data-system="${systemId}"]`).classList.add('active');
+                document.getElementById(`${systemId}-info`).classList.add('active');
+                
+                // Actualizar los botones de partes para mostrar solo los del sistema activo
+                updatePartButtons(systemId);
+            }
+            
+            // Asignar eventos a los botones de sistemas
+            systemButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const systemId = this.getAttribute('data-system');
+                    changeSystem(systemId);
+                });
+            });
+            
+            // Función para actualizar los botones de partes según el sistema activo
+            function updatePartButtons(systemId) {
+                // Ocultar todos los botones de partes
+                partButtons.forEach(button => {
+                    button.style.display = 'none';
+                });
+                
+                // Mostrar solo los botones relevantes para el sistema actual
+                if (systemId === 'muscular') {
+                    partButtons.forEach(button => {
+                        button.style.display = 'block';
+                    });
+                }
+                
+                // Reset de la información de partes
+                partInfos.forEach(info => {
+                    info.classList.remove('active');
+                });
+                
+                // Mostrar la primera parte por defecto si estamos en el sistema muscular
+                if (systemId === 'muscular') {
+                    document.getElementById('biceps-info').classList.add('active');
+                }
+            }
+            
+            // Asignar eventos a los botones de partes
+            partButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const partId = this.getAttribute('data-part');
+                    
+                    // Desactivar todas las informaciones de partes
+                    partInfos.forEach(info => {
+                        info.classList.remove('active');
+                    });
+                    
+                    // Activar la información de la parte seleccionada
+                    document.getElementById(`${partId}-info`).classList.add('active');
+                });
+            });
+            
+            // Inicializar con el sistema muscular
+            changeSystem('muscular');
+        });
+    </script>
+</body>
+</html>
